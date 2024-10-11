@@ -71,8 +71,9 @@ class LinkedList: public I_Printable {
             if (length <= 0) head = node, tail = node;
             else {
                 tail->set_next(node);
-                length += 1;
+                tail = node;
             }
+            length ++;
         }
         void prepend(int value) {}
         void insert(int index, int value) {}        
