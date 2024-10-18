@@ -149,6 +149,38 @@ class LinkedList: public I_Printable {
             }
             return true;
         }
+
+        void deleteNode(size_t index) {
+            if (index == 0) deleteFirst();
+            else if (index == length) deleteLast();
+            else {
+                Node<T> *prev = get(index - 1);
+                if (prev) {
+                    Node<T> *node = prev->get_next();
+                    prev->set_next(node->get_next());
+                    length--;
+                    delete node;
+                }
+            }
+        }
+
+        void reverse() {
+            if (length <= 1) return;
+            else {
+                Node<T> *prev = head;
+                head = tail;
+                tail = prev;
+
+                Node<T> *next = prev->get_next();
+                tail->set_next(nullptr);
+                while(next) {
+                    Node<T> *temp = next->get_next();
+                    next->set_next(prev);
+                    prev = next;
+                    next = temp;
+                }
+            }
+        }
 };
 
 int main() {
@@ -159,20 +191,20 @@ int main() {
     LL->prepend(1);
     LL->append(2);
     LL->append(3);
-
     std::cout << *LL << std::endl;
 
     std::cout << *(LL->get(2)) << std::endl;
 
     LL->set(2, 4);
-
     std::cout << *LL << std::endl;
 
     LL->insert(2, 3);
-
     std::cout << *LL << std::endl;
 
-    LL->deleteFirst();
+    LL->reverse();
+    std::cout << *LL << std::endl;
+
+    LL->deleteNode(2);
     std::cout << *LL << std::endl;
 
     LL->deleteFirst();
