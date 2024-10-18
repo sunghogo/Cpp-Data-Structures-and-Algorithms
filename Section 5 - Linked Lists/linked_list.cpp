@@ -51,7 +51,7 @@ class LinkedList: public I_Printable {
         int get_length() const {return length;}
 
         virtual void print(std::ostream &os) const override { 
-            os << "[Length: " << length << "| Head: " << (head ? (*head) : Node{})  << "| Tail: " << (head ? (*head) : Node{}) << "| List: ";
+            os << "[Length: " << length << "| Head: " << (head ? (*head) : Node{})  << "| Tail: " << (tail ? (*tail) : Node{}) << "| List: ";
             Node *next = head;
             while (next) {
                 os << (*next);
@@ -63,7 +63,7 @@ class LinkedList: public I_Printable {
     
         void append(int value) {
             Node *node = new Node {value};
-            if (length <= 0) head = node, tail = node;
+            if (length <= 0) head = tail = node;
             else {
                 tail->set_next(node);
                 tail = node;
@@ -100,6 +100,18 @@ class LinkedList: public I_Printable {
             }
             length++;
         }
+
+        void deleteFirst() {
+            if (length == 0) return;
+            Node *node = head;
+            if (length == 1) head = tail = nullptr;
+            else {
+                head = head->get_next();
+                delete node;
+            }
+            length--;
+        }
+        
         void insert(int index, int value) {}        
 };
 
@@ -114,7 +126,7 @@ int main() {
 
     std::cout << *LL << std::endl;
 
-    LL->deleteLast();
+    LL->deleteFirst();
     std::cout << *LL << std::endl;
 
     LL->deleteLast();
