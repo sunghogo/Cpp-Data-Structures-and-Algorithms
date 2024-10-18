@@ -1,7 +1,6 @@
 #include <iostream>
 #include <memory>
 
-using namespace std;
 
 class I_Printable {
     friend std::ostream &operator<<(std::ostream &os, const I_Printable &obj);
@@ -15,44 +14,46 @@ std::ostream &operator<<(std::ostream &os, const I_Printable &obj) {
     return os;
 }
 
+template <typename T>
 class Node : public I_Printable {
     private:
-        int value;
+        T value;
         Node* next;
     public:
-        Node(int value) : value {value}, next {nullptr} {}
+        Node(T value) : value {value}, next {nullptr} {}
         Node() : Node {0} {};
 
         int get_value() const { return value; }
         Node *get_next() const { return next; }
-        void set_value(int value) { this->value = value; }
+        void set_value(T value) { this->value = value; }
         void set_next(Node *next) {  this->next = next; }
 
         virtual void print(std::ostream &os) const override { os << value; }
 };
 
+template <typename T>
 class LinkedList: public I_Printable {
     private:
-        Node *head;
-        Node *tail;
+        Node<T> *head;
+        Node<T> *tail;
         int length;
     public:
         LinkedList() : head {nullptr}, tail {nullptr}, length {0} {};
-        LinkedList(int value) : head {new Node {value}}, tail {head}, length {1} {}
+        LinkedList(T value) : head {new Node<T> {value}}, tail {head}, length {1} {}
         ~LinkedList() { 
             while (head) {
-                Node *node = head;
+                Node<T> *node = head;
                 head = head->get_next();
                 delete node;
             }
         }
-        Node *get_head() const {return head;}
-        Node *get_tail() const {return tail;}
-        int get_length() const {return length;}
+        Node<T> *get_head() const {return head;}
+        Node<T> *get_tail() const {return tail;}
+        size_t get_length() const {return length;}
 
         virtual void print(std::ostream &os) const override { 
-            os << "[Length: " << length << "| Head: " << (head ? (*head) : Node{})  << "| Tail: " << (tail ? (*tail) : Node{}) << "| List: ";
-            Node *next = head;
+            os << "[Length: " << length << "| Head: " << (head ? (*head) : Node<T>{})  << "| Tail: " << (tail ? (*tail) : Node<T>{}) << "| List: ";
+            Node<T> *next = head;
             while (next) {
                 os << (*next);
                 next = next->get_next();
@@ -61,8 +62,8 @@ class LinkedList: public I_Printable {
             os << "]";
          }
     
-        void append(int value) {
-            Node *node = new Node {value};
+        void append(T value) {
+            Node<T> *node = new Node<T> {value};
             if (length <= 0) head = tail = node;
             else {
                 tail->set_next(node);
@@ -78,8 +79,8 @@ class LinkedList: public I_Printable {
                 length--;
             }
             else {
-                Node *pre = head;
-                Node *temp = head;
+                Node<T> *pre = head;
+                Node<T> *temp = head;
                 while (temp->get_next()) {
                     pre = temp;
                     temp = temp->get_next();
@@ -91,8 +92,8 @@ class LinkedList: public I_Printable {
             }
         }
 
-        void prepend(int value) {
-            Node *node = new Node {value};
+        void prepend(T value) {
+            Node<T> *node = new Node<T> {value};
             if (length == 0) head = tail = node;
             else {
                 node->set_next(head);
@@ -103,7 +104,7 @@ class LinkedList: public I_Printable {
 
         void deleteFirst() {
             if (length == 0) return;
-            Node *node = head;
+            Node<T> *node = head;
             if (length == 1) head = tail = nullptr;
             else {
                 head = head->get_next();
@@ -111,12 +112,47 @@ class LinkedList: public I_Printable {
             }
             length--;
         }
+
+        Node<T> *get(size_t index) {
+            if (index < 0 || index >= length ) return nullptr;
+            else {
+                Node<T> *node = head;
+                for (int i {0}; i < index; i++) {
+                    node = node->get_next();
+                }
+                return node;
+            }
+        }
+
+        bool set(size_t index, T value) {
+            Node<T> *node = get(index);
+            if (node) {
+                node->set_value(value);
+                return true;
+            }
+            return false;   
+        }
         
-        void insert(int index, int value) {}        
+        bool insert(size_t index, T value) {
+            if (index == 0) prepend(value);
+            else if (index == length) append(value);
+            else {
+                Node<T> *prev = get(index - 1);
+                Node<T> *node = new Node<T> {value};
+                if (prev) {
+                    node->set_next(prev->get_next());
+                    prev->set_next(node);
+                    length++;
+                } else {
+                    return false;
+                }
+            }
+            return true;
+        }
 };
 
 int main() {
-    unique_ptr<LinkedList> LL {new LinkedList{}};
+    std::unique_ptr<LinkedList<int>> LL {new LinkedList<int>{}};
 
     std::cout << *LL << std::endl;
     
@@ -124,6 +160,19 @@ int main() {
     LL->append(2);
     LL->append(3);
 
+    std::cout << *LL << std::endl;
+
+    std::cout << *(LL->get(2)) << std::endl;
+
+    LL->set(2, 4);
+
+    std::cout << *LL << std::endl;
+
+    LL->insert(2, 3);
+
+    std::cout << *LL << std::endl;
+
+    LL->deleteFirst();
     std::cout << *LL << std::endl;
 
     LL->deleteFirst();
