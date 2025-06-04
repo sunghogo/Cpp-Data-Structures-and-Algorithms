@@ -1,1 +1,11 @@
+# General
+.clang-format
+build/
+.vscode/
+
+# Mac
+*.dSYM/
+.DS_Store
+
+# Windows
 *.exe
