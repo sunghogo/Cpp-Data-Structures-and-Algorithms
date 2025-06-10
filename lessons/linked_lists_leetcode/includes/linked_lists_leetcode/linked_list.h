@@ -320,8 +320,6 @@ class LinkedList {
     Node* head = getHead();
     Node* tail = getTail();
 
-    if (!head || head == tail) return head;
-
     Node* slow = head;
     Node* fast = head;
 
