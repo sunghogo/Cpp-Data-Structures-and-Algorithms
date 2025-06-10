@@ -72,14 +72,10 @@ class SinglyLinkedList : public PrintableInterface {
       return;
     }
 
-    auto current = head_;
-    while (current->GetNextPointer() &&
-           current->GetNextPointer()->GetNextPointer()) {
-      current = current->GetNextPointer();
-    }
-
-    current->ReleaseNext();
-    SetTail(current);
+    auto prev = head_;
+    for (size_t i = 0; i < length_ - 2; i++) prev = prev->GetNextPointer();
+    prev->ReleaseNext();
+    SetTail(prev);
     --length_;
   }
 
@@ -178,22 +174,23 @@ class SinglyLinkedList : public PrintableInterface {
   }
 
   void Reverse() {
-    if (length_ <= 1)
-      return;
-    else {
-      auto old_head = ReleaseHead();
-      auto prev = old_head;
-      auto curr = prev->ReleaseNext();
+    if (length_ <= 1) return;
 
-      while (curr) {
-        auto next = curr->ReleaseNext();
-        curr->SetNext(prev);
-        prev = curr;
-        curr = std::move(next);
-      }
+    // Reverse head and tail
+    auto old_head = ReleaseHead();
+    SetHead(ReleaseTail());
+    SetTail(old_head);
 
-      SetTail(old_head);
-      SetHead(prev);
+    // Setup nodes current = tail, next = old_head->next
+    std::shared_ptr<Node<T>> prev = nullptr;
+    auto current = tail_.lock();
+
+    // Iterate and reverse links
+    for (size_t i = 0; i < length_; i++) {
+      auto next = current->GetNextPointer();
+      current->SetNext(prev);
+      prev = current;
+      current = next;
     }
   }
 
