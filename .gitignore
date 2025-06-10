@@ -2,6 +2,7 @@
 .clang-format
 build/
 .vscode/
+tempCodeRunnerFile.cpp
 
 # Mac
 *.dSYM/
