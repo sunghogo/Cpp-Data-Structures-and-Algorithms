@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <memory>
+#include <unordered_set>
 #include "linked_lists_leetcode/node.h"
 
 using namespace std;
@@ -56,6 +57,10 @@ class LinkedList {
 
   Node* getTail() {
     return tail.lock().get();
+  }
+
+  std::shared_ptr<Node> getHeadPtr() {
+    return head;
   }
 
   size_t getLength() {
@@ -318,16 +323,162 @@ class LinkedList {
   //   +======================================================+
   Node* findMiddleNode() {
     Node* head = getHead();
-    Node* tail = getTail();
+    // Node* tail = getTail();
 
     Node* slow = head;
     Node* fast = head;
 
-    while (fast != tail && fast) {
+    while (fast && fast->next) {
       slow = slow->next.get();
       fast = fast->next->next.get();
     }
     return slow;
+  }
+
+  //   +======================================================+
+  //   |                 WRITE YOUR CODE HERE                 |
+  //   | Description:                                         |
+  //   | - Check if the linked list has a loop                |
+  //   | - Return type: bool                                  |
+  //   |                                                      |
+  //   | Tips:                                                |
+  //   | - Use two pointers: 'slow' and 'fast'                |
+  //   | - 'slow' moves one step, 'fast' moves two            |
+  //   | - If they meet, a loop exists                        |
+  //   | - Return true if loop found, false otherwise         |
+  //   | - 'fast' checks for null and its 'next' for null     |
+  //   +======================================================+
+  bool hasLoop() {
+    Node *slow, *fast;
+    slow = fast = getHead();
+
+    while (fast && fast->next) {
+      slow = slow->next.get();
+      fast = fast->next->next.get();
+      if (slow == fast) return true;
+    }
+    return false;
+  }
+
+  //   +======================================================+
+  //   |                 WRITE YOUR CODE HERE                 |
+  //   | Description:                                         |
+  //   | - Find the k-th node from the end of the list        |
+  //   | - Return type: Node*                                 |
+  //   |                                                      |
+  //   | Tips:                                                |
+  //   | - Use two pointers: 'slow' and 'fast'                |
+  //   | - Move 'fast' k nodes ahead first                    |
+  //   | - If 'fast' reaches null, k is too large             |
+  //   | - Then move both 'slow' and 'fast' until end         |
+  //   | - Return 'slow' as the k-th node from the end        |
+  //   +======================================================+
+  Node* findKthFromEnd(int k) {
+    if (k <= 0) return nullptr;
+
+    Node *slow, *fast;
+    slow = fast = getHead();
+
+    for (int i = 1; i < k; i++) {
+      fast = fast->next.get();
+      if (!fast) return nullptr;
+    }
+    while (fast && fast->next) {
+      slow = slow->next.get();
+      fast = fast->next.get();
+    }
+    return slow;
+  }
+
+  //   +======================================================+
+  //   |                 WRITE YOUR CODE HERE                 |
+  //   | Description:                                         |
+  //   | - Remove duplicate nodes from the list               |
+  //   | - Return type: void                                  |
+  //   |                                                      |
+  //   | Tips:                                                |
+  //   | - Use two pointers: 'current' and 'runner'           |
+  //   | - 'current' scans each node                          |
+  //   | - 'runner' checks for duplicates ahead               |
+  //   | - If duplicate found, delete it                      |
+  //   | - Update 'next' pointers and reduce length           |
+  //   | - No return value, list updated in-place             |
+  //   +======================================================+
+  void removeDuplicates() {
+    std::unordered_set<int> set;
+    Node* prev = nullptr;
+    Node* current = getHead();
+    while (current) {
+      if (set.count(current->value)) {
+        prev->next = current->next;
+        current = prev->next.get();
+      } else {
+        set.insert(current->value);
+        prev = current;
+        current = current->next.get();
+      }
+    }
+  }
+
+  //   +======================================================+
+  //   |                 WRITE YOUR CODE HERE                 |
+  //   | Description:                                         |
+  //   | - Convert binary number in list to decimal           |
+  //   | - Return type: int                                   |
+  //   |                                                      |
+  //   | Tips:                                                |
+  //   | - Use a single pointer: 'current'                    |
+  //   | - Initialize an integer 'num' to 0                   |
+  //   | - Loop through the list                              |
+  //   | - Use the formula: num = num * 2 + current->value    |
+  //   | - Return 'num' as the decimal value                  |
+  //   +======================================================+
+  int binaryToDecimal() {
+    int decimal{0};
+    Node* current = getHead();
+    while (current) {
+      decimal *= 2;
+      decimal += current->value;
+      current = current->next.get();
+    }
+    return decimal;
+  }
+
+  //   +======================================================+
+  //   |                 WRITE YOUR CODE HERE                 |
+  //   | Description:                                         |
+  //   | - Partition list around value x                      |
+  //   | - Return type: void                                  |
+  //   |                                                      |
+  //   | Tips:                                                |
+  //   | - Create two dummy nodes for two new lists           |
+  //   | - One list for nodes less than x                     |
+  //   | - Another list for nodes greater or equal to x       |
+  //   | - Loop through original list                         |
+  //   | - Assign nodes to new lists based on value           |
+  //   | - Merge the two new lists                            |
+  //   | - Update the original list's head                    |
+  //   +======================================================+
+  void partitionList(int x) {
+    std::shared_ptr<Node> part1Head = std::make_shared<Node>(0);
+    std::shared_ptr<Node> part2Head = std::make_shared<Node>(0);
+    Node* part1Ptr = part1Head.get();
+    Node* part2Ptr = part2Head.get();
+
+    std::shared_ptr<Node> current = getHeadPtr();
+    for (int i = 0; i < length; i++) {
+      if (current->value < x) {
+        part1Ptr->next = current;
+        part1Ptr = part1Ptr->next.get();
+      } else {
+        part2Ptr->next = current;
+        part2Ptr = part2Ptr->next.get();
+      }
+      current = current->next;
+    }
+    part2Ptr->next = nullptr;
+    part1Ptr->next = part2Head->next;
+    head = part1Head->next;
   }
 };
 
